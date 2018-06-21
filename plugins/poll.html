@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link href="https://resource.nos-eastchina1.126.net/feehi/backend/js/plugins/ueditor/themes/default/css/ueditor.css" type="text/css" rel="stylesheet">
+    <style type="text/css">
+        .edui-state-disabled .edui-button-body {
+            color: #ccc;
+        }
+        .table {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="content">
+    <table class="table" id="formList">
+        <thead>
+        <tr>
+            <th>标题</th>
+            <th style="width: 100px;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr class="edui-default form-footer">
+            <td colspan="2" style="text-align: right" class="edui-dialog-buttons">
+                <div data-type="prev" class="edui-box edui-button edui-prevbutton edui-default"><div class="edui-default edui-state"><div class="edui-button-wrap edui-default"><div unselectable="on" class="edui-button-body edui-default" ><div class="edui-box edui-icon edui-default"></div><div class="edui-box edui-label edui-default">上一页</div></div></div></div></div>
+                <div data-type="next" class="edui-box edui-button edui-nextbutton edui-default"><div class="edui-default edui-state"><div class="edui-button-wrap edui-default"><div unselectable="on" class="edui-button-body edui-default" ><div class="edui-box edui-icon edui-default"></div><div class="edui-box edui-label edui-default">下一页</div></div></div></div></div>
+                <div data-type="close" class="edui-box edui-button edui-cancelbutton edui-default"><div class="edui-default edui-state"><div class="edui-button-wrap edui-default"><div unselectable="on" class="edui-button-body edui-default"><div class="edui-box edui-icon edui-default"></div><div class="edui-box edui-label edui-default">关闭</div></div></div></div></div>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://resource.nos-eastchina1.126.net/feehi/backend/js/plugins/ueditor/dialogs/internal.js"></script>
+<script>
+$(document).ready(function () {
+    var template = '<tr class="edui-default"><td>[[title]]</td><td class="edui-dialog-buttons">' +
+        '<div data-type="insert" data-id="[[id]]" class="edui-box edui-button edui-insertbutton edui-default"><div class="edui-default edui-state"><div class="edui-button-wrap edui-default"><div unselectable="on" class="edui-button-body edui-default" ><div class="edui-box edui-icon edui-default"></div><div class="edui-box edui-label edui-default">插入到文章</div></div></div></div></div>' +
+        '</td></tr>';
+    var prevBtn = $('.edui-prevbutton');
+    var nextBtn = $('.edui-nextbutton');
+    var closeBtn = $('.edui-cancelbutton');
+    var currentPage = 1;
+    var request = function (page) {
+        $.get('/data.json', function (result) {
+            var tbody = $('#formList tbody');
+            var data = result.data;
+            tbody.html('');
+            for (var i = 0; i < data.length; i++) {
+                var html = template.replace('[[title]]', data[i].title).replace('[[id]]', data[i].id);
+                tbody.append(html);
+            }
+            currentPage = result.current;
+            if (result.total == result.current) {
+                $('.edui-state', nextBtn).addClass('edui-state-disabled');
+            } else {
+                $('.edui-state', nextBtn).removeClass('edui-state-disabled');
+            }
+            if (result.current == 1) {
+                $('.edui-state', prevBtn).addClass('edui-state-disabled');
+            } else {
+                $('.edui-state', prevBtn).removeClass('edui-state-disabled');
+            }
+        });
+    };
+    $('#formList').on('mousedown', '.edui-state', function () {
+        if($(this).hasClass('edui-state-disabled'))
+            return;
+        $(this).removeClass('edui-state-hover').addClass('edui-state-active')
+    }).on('mouseover', '.edui-state', function () {
+        if($(this).hasClass('edui-state-disabled'))
+            return;
+        $(this).removeClass('edui-state-active').addClass('edui-state-hover');
+    }).on('mouseout', '.edui-state', function () {
+        $(this).removeClass('edui-state-hover edui-state-active')
+    }).on('click', '.edui-state', function () {
+        var btn = $(this).parent();
+        switch (btn.data('type')){
+            case 'prev':
+                request(currentPage - 1);
+                break;
+            case 'next':
+                request(currentPage + 1);
+                break;
+            case 'close':
+                dialog.close();
+                break;
+            case 'insert':
+                editor.execCommand('insertHtml', '<p><br/></p><p class="poll" style="poll-' + btn.data('id') + '">======= 请勿修改此投票域 [[poll-' + btn.data('id') + ']] =======</p>');
+                dialog.close();
+                break;
+        }
+    });
+
+    request(currentPage);
+})
+</script>
+</body>
+</html>

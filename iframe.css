@@ -1,0 +1,25 @@
+/*可以在这里添加你自己的css*/
+
+p.poll {
+    display: block;
+    position: relative;
+    visibility: hidden;
+    padding: 5px;
+    height: 21px;
+}
+p.poll:after {
+    position: absolute;
+    left:0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    content:"======= 请勿修改此投票域 [[" attr(style) "]] ======";
+    text-align: center;
+    color:#cacaca;
+    z-index: 0;
+    border:1px solid #ccc;
+    background: #efefef;
+    padding: 5px;
+    visibility: visible;
+    height: 21px;
+}
